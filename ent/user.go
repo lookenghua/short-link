@@ -6,15 +6,44 @@ import (
 	"fmt"
 	"short-link/ent/user"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 )
 
 // User is the model entity for the User schema.
 type User struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
+	// 主键ID
 	ID int `json:"id,omitempty"`
+	// CreatedAt holds the value of the "createdAt" field.
+	// 创建时间
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	// UpdatedAt holds the value of the "updatedAt" field.
+	// 更新时间
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	// DeletedAt holds the value of the "deletedAt" field.
+	// 删除时间
+	DeletedAt time.Time `json:"deletedAt,omitempty"`
+	// Username holds the value of the "username" field.
+	// 用户名
+	Username int `json:"username,omitempty"`
+	// Role holds the value of the "role" field.
+	// 用户角色
+	Role user.Role `json:"role,omitempty"`
+	// Avatar holds the value of the "avatar" field.
+	// 头像
+	Avatar string `json:"avatar,omitempty"`
+	// Phone holds the value of the "phone" field.
+	// 手机号
+	Phone *string `json:"phone,omitempty"`
+	// Email holds the value of the "email" field.
+	// 邮箱
+	Email *string `json:"email,omitempty"`
+	// Token holds the value of the "token" field.
+	// 登录token
+	Token *string `json:"token,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -22,8 +51,12 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID:
+		case user.FieldID, user.FieldUsername:
 			values[i] = new(sql.NullInt64)
+		case user.FieldRole, user.FieldAvatar, user.FieldPhone, user.FieldEmail, user.FieldToken:
+			values[i] = new(sql.NullString)
+		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt:
+			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -45,6 +78,63 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			u.ID = int(value.Int64)
+		case user.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field createdAt", values[i])
+			} else if value.Valid {
+				u.CreatedAt = value.Time
+			}
+		case user.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updatedAt", values[i])
+			} else if value.Valid {
+				u.UpdatedAt = value.Time
+			}
+		case user.FieldDeletedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field deletedAt", values[i])
+			} else if value.Valid {
+				u.DeletedAt = value.Time
+			}
+		case user.FieldUsername:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field username", values[i])
+			} else if value.Valid {
+				u.Username = int(value.Int64)
+			}
+		case user.FieldRole:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field role", values[i])
+			} else if value.Valid {
+				u.Role = user.Role(value.String)
+			}
+		case user.FieldAvatar:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field avatar", values[i])
+			} else if value.Valid {
+				u.Avatar = value.String
+			}
+		case user.FieldPhone:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field phone", values[i])
+			} else if value.Valid {
+				u.Phone = new(string)
+				*u.Phone = value.String
+			}
+		case user.FieldEmail:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field email", values[i])
+			} else if value.Valid {
+				u.Email = new(string)
+				*u.Email = value.String
+			}
+		case user.FieldToken:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field token", values[i])
+			} else if value.Valid {
+				u.Token = new(string)
+				*u.Token = value.String
+			}
 		}
 	}
 	return nil
@@ -73,6 +163,30 @@ func (u *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
 	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(", createdAt=")
+	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updatedAt=")
+	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(", deletedAt=")
+	builder.WriteString(u.DeletedAt.Format(time.ANSIC))
+	builder.WriteString(", username=")
+	builder.WriteString(fmt.Sprintf("%v", u.Username))
+	builder.WriteString(", role=")
+	builder.WriteString(fmt.Sprintf("%v", u.Role))
+	builder.WriteString(", avatar=")
+	builder.WriteString(u.Avatar)
+	if v := u.Phone; v != nil {
+		builder.WriteString(", phone=")
+		builder.WriteString(*v)
+	}
+	if v := u.Email; v != nil {
+		builder.WriteString(", email=")
+		builder.WriteString(*v)
+	}
+	if v := u.Token; v != nil {
+		builder.WriteString(", token=")
+		builder.WriteString(*v)
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

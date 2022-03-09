@@ -2,8 +2,13 @@ package main
 
 import (
 	"log"
+	"short-link/model"
 	"short-link/router"
 )
+
+func init() {
+	model.InitDatabase()
+}
 
 func main() {
 	app := router.InitRouter()
