@@ -1,10 +1,12 @@
 package router
 
+import . "short-link/router/middleware"
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	v1 "short-link/router/api/v1"
@@ -38,16 +40,20 @@ func InitRouter() *fiber.App {
 				return "static-id"
 			},
 		}))
-
+		// 日志记录中间件
+		app.Use(LoggerMiddleware)
+	}
+	// 全局路由
+	{
+		// 展示监控
+		app.Get("/", monitor.New())
 	}
 
 	// 路由
 	{
-		app.Get("/", func(ctx *fiber.Ctx) error {
-			return ctx.SendString("start success")
-		})
 		api := app.Group("/api")
 		apiV1 := api.Group("/v1")
+		// 创建用户
 		apiV1.Post("/user", v1.CreateUser)
 	}
 
