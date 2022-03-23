@@ -18,7 +18,6 @@ type ErrorResponse struct {
 func ValidateStruct(u interface{}) *string {
 	var errors []*ErrorResponse
 	err := validate.Struct(u)
-	fmt.Printf("error: %T\n", err)
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			var element ErrorResponse
