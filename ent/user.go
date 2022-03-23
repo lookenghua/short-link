@@ -25,13 +25,16 @@ type User struct {
 	UpdatedAt time.Time `json:"updatedAt,omitempty"`
 	// DeletedAt holds the value of the "deletedAt" field.
 	// 删除时间
-	DeletedAt time.Time `json:"deletedAt,omitempty"`
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
 	// Username holds the value of the "username" field.
 	// 用户名
-	Username int `json:"username,omitempty"`
+	Username string `json:"username,omitempty"`
 	// Role holds the value of the "role" field.
 	// 用户角色
 	Role user.Role `json:"role,omitempty"`
+	// Password holds the value of the "password" field.
+	// 密码
+	Password *string `json:"password,omitempty"`
 	// Avatar holds the value of the "avatar" field.
 	// 头像
 	Avatar string `json:"avatar,omitempty"`
@@ -51,9 +54,9 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID, user.FieldUsername:
+		case user.FieldID:
 			values[i] = new(sql.NullInt64)
-		case user.FieldRole, user.FieldAvatar, user.FieldPhone, user.FieldEmail, user.FieldToken:
+		case user.FieldUsername, user.FieldRole, user.FieldPassword, user.FieldAvatar, user.FieldPhone, user.FieldEmail, user.FieldToken:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt, user.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -94,19 +97,27 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deletedAt", values[i])
 			} else if value.Valid {
-				u.DeletedAt = value.Time
+				u.DeletedAt = new(time.Time)
+				*u.DeletedAt = value.Time
 			}
 		case user.FieldUsername:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field username", values[i])
 			} else if value.Valid {
-				u.Username = int(value.Int64)
+				u.Username = value.String
 			}
 		case user.FieldRole:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field role", values[i])
 			} else if value.Valid {
 				u.Role = user.Role(value.String)
+			}
+		case user.FieldPassword:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field password", values[i])
+			} else if value.Valid {
+				u.Password = new(string)
+				*u.Password = value.String
 			}
 		case user.FieldAvatar:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -167,12 +178,18 @@ func (u *User) String() string {
 	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updatedAt=")
 	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
-	builder.WriteString(", deletedAt=")
-	builder.WriteString(u.DeletedAt.Format(time.ANSIC))
+	if v := u.DeletedAt; v != nil {
+		builder.WriteString(", deletedAt=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", username=")
-	builder.WriteString(fmt.Sprintf("%v", u.Username))
+	builder.WriteString(u.Username)
 	builder.WriteString(", role=")
 	builder.WriteString(fmt.Sprintf("%v", u.Role))
+	if v := u.Password; v != nil {
+		builder.WriteString(", password=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", avatar=")
 	builder.WriteString(u.Avatar)
 	if v := u.Phone; v != nil {

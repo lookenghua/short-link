@@ -2,12 +2,14 @@ package main
 
 import (
 	"log"
+	"short-link/common/validation"
 	"short-link/model"
 	"short-link/router"
 )
 
 func init() {
 	model.InitDatabase()
+	validation.InitValidation()
 }
 
 func main() {

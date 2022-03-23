@@ -28,7 +28,7 @@ func init() {
 	// user.UpdateDefaultUpdatedAt holds the default value on update for the updatedAt field.
 	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 	// userDescAvatar is the schema descriptor for avatar field.
-	userDescAvatar := userFields[2].Descriptor()
+	userDescAvatar := userFields[3].Descriptor()
 	// user.DefaultAvatar holds the default value on creation for the avatar field.
 	user.DefaultAvatar = userDescAvatar.Default.(string)
 }

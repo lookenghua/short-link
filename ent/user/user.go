@@ -22,6 +22,8 @@ const (
 	FieldUsername = "username"
 	// FieldRole holds the string denoting the role field in the database.
 	FieldRole = "role"
+	// FieldPassword holds the string denoting the password field in the database.
+	FieldPassword = "password"
 	// FieldAvatar holds the string denoting the avatar field in the database.
 	FieldAvatar = "avatar"
 	// FieldPhone holds the string denoting the phone field in the database.
@@ -42,6 +44,7 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldUsername,
 	FieldRole,
+	FieldPassword,
 	FieldAvatar,
 	FieldPhone,
 	FieldEmail,

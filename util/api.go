@@ -7,8 +7,12 @@ import . "short-link/common/validation"
 
 // 错误代码
 const (
-	ParseError    = iota + 1001 // 解析错误
-	ValidateError               // 校验错误
+	ParseError        = iota + 1001 // 解析错误
+	ValidateError                   // 校验错误
+	UnknownError                    // 未知错误
+	DataNotFoundError               // 数据不存在
+	DataFoundError                  // 数据已存在
+	CreateError                     // 创建数据错误
 )
 
 // ApiUtil API工具

@@ -27,8 +27,9 @@ func (User) Mixin() []ent.Mixin {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("username").Comment("用户名"),
+		field.String("username").Comment("用户名"),
 		field.Enum("role").Comment("用户角色").Values("ADMIN", "USER"),
+		field.String("password").Comment("密码").Optional().Nillable(),
 		field.String("avatar").Comment("头像").Default("/avatar/default.png"),
 		field.String("phone").Comment("手机号").Optional().Nillable(),
 		field.String("email").Comment("邮箱").Optional().Nillable(),

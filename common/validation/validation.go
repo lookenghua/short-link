@@ -53,9 +53,24 @@ func ValidateStruct(u interface{}) *string {
 		case "email":
 			str = fmt.Sprintf("参数%v的值%v不是合法邮箱", firstErr.Json, firstErr.Value)
 			break
-
+		case "phone":
+			str = fmt.Sprintf("参数%v的值%v不是合法手机号", firstErr.Json, firstErr.Value)
+			break
+		default:
+			str = fmt.Sprintf("参数%v的值%v发生%v错误", firstErr.Json, firstErr.Value, firstErr.Tag)
+			break
 		}
 		return &str
 	}
 	return nil
+}
+
+// InitValidation 初始化自定义校验
+func InitValidation() {
+	// 校验手机号
+	err := validate.RegisterValidation("phone", isPhone)
+	if err != nil {
+		fmt.Println("===注册phone失败===")
+		return
+	}
 }
