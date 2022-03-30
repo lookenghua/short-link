@@ -1,6 +1,8 @@
 package router
 
-import . "short-link/router/middleware"
+import (
+	. "short-link/router/middleware"
+)
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -55,6 +57,8 @@ func InitRouter() *fiber.App {
 		apiV1 := api.Group("/v1")
 		// 创建用户
 		apiV1.Post("/user", v1.CreateUser)
+		// 用户登录
+		apiV1.Post("/user/token", v1.LoginUser)
 	}
 
 	return app

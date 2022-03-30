@@ -15,3 +15,8 @@ func CreateUser(u ent.User) (*ent.User, error) {
 func FindByUsername(username string) (*ent.User, error) {
 	return client.User.Query().Where(user.UsernameEQ(username)).First(context.Background())
 }
+
+// UpdateToken 更新用户token
+func UpdateToken(id int, t string) (*ent.User, error) {
+	return client.User.UpdateOneID(id).SetToken(t).Save(context.Background())
+}

@@ -2,12 +2,14 @@ package service
 
 import (
 	"errors"
+	"github.com/golang-jwt/jwt/v4"
 	. "short-link/common/dto"
+	"short-link/config"
 	"short-link/ent"
 	"short-link/ent/user"
 	"short-link/model"
+	"time"
 )
-import . "short-link/util"
 
 // CreateUser 创建用户
 func CreateUser(data *CreateUserDto) (*ent.User, error) {
@@ -31,4 +33,36 @@ func CreateUser(data *CreateUserDto) (*ent.User, error) {
 		return nil, createErr
 	}
 	return newUser, nil
+}
+
+// FindByUsername 根据用户名查询用户
+func FindByUsername(username string) (*ent.User, error) {
+	u, err := model.FindByUsername(username)
+	if err != nil && !ent.IsNotFound(err) {
+		return nil, err
+	}
+	return u, nil
+}
+
+// CreateToken 创建token
+func CreateToken(id int) (string, error) {
+	claims := jwt.MapClaims{
+		"id":  id,
+		"exp": time.Now().Add(time.Hour * 72).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	t, err := token.SignedString([]byte(config.SecretKey))
+	if err != nil {
+		return "", err
+	}
+	return t, nil
+}
+
+// SaveToken 更新token
+func SaveToken(id int, token string) error {
+	_, err := model.UpdateToken(id, token)
+	if err != nil {
+		return err
+	}
+	return nil
 }
