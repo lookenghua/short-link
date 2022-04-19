@@ -1,3 +1,11 @@
 {
-  "globals": {}
+  "globals": {
+    "NButton": true,
+    "NCard": true,
+    "NCheckbox": true,
+    "NConfigProvider": true,
+    "NForm": true,
+    "NFormItem": true,
+    "NInput": true
+  }
 }

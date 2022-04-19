@@ -1,12 +1,11 @@
 <template>
-  <AConfigprovider :locale="zhCN">
+  <n-config-provider :locale="zhCN" :date-locale="dateZhCN">
     <router-view />
-  </AConfigprovider>
+  </n-config-provider>
 </template>
 
 <script setup>
-import { ConfigProvider as AConfigprovider } from "ant-design-vue";
-import zhCN from "ant-design-vue/es/locale/zh_CN";
+import { zhCN, dateZhCN } from "naive-ui";
 </script>
 
 <style></style>

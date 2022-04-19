@@ -2,19 +2,25 @@
   <div class="page">
     <img src="../../../assets/images/login/blog.png" alt="" class="img-blog" />
     <div class="login-area">
-      <a-card
-        title="欢迎登录博客管理系统"
-        :head-style="headStyle"
-        :body-style="bodyStyle"
+      <n-card
+        title="欢迎登录短链接管理系统"
+        :header-style="headStyle"
+        :content-style="bodyStyle"
         class="card"
+        size="large"
       >
-        <a-form>
-          <a-form-item>
-            <a-input
+        <n-form
+          ref="formRef"
+          :model="modelRef"
+          :rules="rulesRef"
+          size="small"
+          :show-label="false"
+        >
+          <n-form-item path="username">
+            <n-input
               v-model:value="modelRef.username"
-              size="large"
               placeholder="请输入用户名"
-              class="input"
+              size="large"
             >
               <template #prefix>
                 <Icon
@@ -25,15 +31,15 @@
                   color="rgba(0, 0, 0, 0.25)"
                 />
               </template>
-            </a-input>
-          </a-form-item>
-          <a-form-item style="margin-bottom: 10px">
-            <a-input-password
+            </n-input>
+          </n-form-item>
+          <n-form-item path="password">
+            <n-input
               v-model:value="modelRef.password"
               type="password"
               size="large"
+              show-password-on="mousedown"
               placeholder="请输入密码"
-              class="input"
             >
               <template #prefix>
                 <Icon
@@ -44,41 +50,37 @@
                   color="rgba(0, 0, 0, 0.25)"
                 />
               </template>
-            </a-input-password>
-          </a-form-item>
-          <a-form-item>
-            <a-checkbox v-model:checked="rememberPass">记住密码</a-checkbox>
-          </a-form-item>
-          <a-form-item>
-            <a-button
-              type="primary"
+            </n-input>
+          </n-form-item>
+          <n-form-item>
+            <n-checkbox v-model:checked="rememberPass">记住密码</n-checkbox>
+          </n-form-item>
+          <n-form-item>
+            <n-button
+              type="info"
               block
-              shape="round"
+              round
               size="large"
               :loading="loading"
               @click="submit"
+              >登录</n-button
             >
-              登录
-            </a-button>
-          </a-form-item>
-        </a-form>
-      </a-card>
+          </n-form-item>
+        </n-form>
+      </n-card>
     </div>
   </div>
 </template>
 
 <script setup>
-import { encryptData } from "@/api/tool.js";
-import { Form, message } from "ant-design-vue";
-import { onMounted, reactive, ref, toRaw } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { useLocalStorage } from "@/hooks/storage.js";
-import { useRouter } from "vue-router";
-import { useUserStore } from "@/store/modules/user.js";
-
-const useForm = Form.useForm;
+import init, { md5encrypt } from "wasm-utils";
+const formRef = ref(null);
 const rememberPass = ref(false);
 const loading = ref(false);
 
+init();
 const accountStorage = useLocalStorage("account");
 const headStyle = {
   border: "none",
@@ -88,7 +90,7 @@ const headStyle = {
   textAlign: "center",
 };
 const bodyStyle = {
-  padding: "35px",
+  padding: "20px 30px",
 };
 const modelRef = reactive({
   username: "",
@@ -108,8 +110,6 @@ const rulesRef = reactive({
     },
   ],
 });
-const { validate } = useForm(modelRef, rulesRef);
-const router = useRouter();
 
 onMounted(() => {
   if (accountStorage.value !== null) {
@@ -120,26 +120,13 @@ onMounted(() => {
 });
 
 // 校验
-function submit() {
-  validate().then(() => {
-    loading.value = true;
-    encryptData(modelRef.password)
-      .then((res) => {
-        const userStore = useUserStore();
-        userStore
-          .login({ username: modelRef.username, password: res.data })
-          .then(() => {
-            if (rememberPass.value) {
-              accountStorage.value = toRaw(modelRef);
-            }
-            loading.value = false;
-            message.success("登录成功");
-            router.push("/dashboard");
-          });
-      })
-      .catch(() => {
-        loading.value = false;
-      });
+function submit(e) {
+  e.preventDefault();
+  formRef.value?.validate((errors) => {
+    if (!errors) {
+      console.log(modelRef);
+      console.log(md5encrypt(modelRef.password));
+    }
   });
 }
 </script>

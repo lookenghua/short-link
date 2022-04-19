@@ -1,43 +1,53 @@
-import { message } from "ant-design-vue";
-import { useUserStore } from "@/store/modules/user";
-import axios from "axios";
+import URI from "urijs";
+const defaultOptions = {
+  baseURL: String(import.meta.env.VITE_API_URL),
+};
 
-const request = axios.create({
-  baseURL: import.meta.env.VUE_APP_API,
-  timeout: 5000,
-});
-
-request.interceptors.request.use(
-  function (config) {
-    const userStore = useUserStore();
-    const token = userStore.getToken;
-    if (token) {
-      config.headers.authorization = "Bearer " + token;
-    }
-    return config;
-  },
-  function (error) {
-    // Do something with request error
-    return Promise.reject(error);
+/**
+ * 合并地址
+ * @param {string} url  - 接口地址
+ * @param {Object} params  - 参数
+ * @return {string}
+ */
+function mergeURI(url, params = {}) {
+  if (url.startsWith("http")) {
+    return url;
   }
-);
-
-// Add a response interceptor
-request.interceptors.response.use(
-  function (response) {
-    const res = response.data;
-    if (res.success) {
-      return res;
-    }
-
-    return Promise.reject(res.errorMessage);
-  },
-  function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
-    message.error(error.toString() || "网络异常");
-    return Promise.reject(error);
+  const u = new URI(new URL(url, defaultOptions.baseURL).toString());
+  for (let key in params) {
+    u.addQuery(key, params[key]);
   }
-);
+  return u.toString();
+}
+// 参数合并
+function mergeOptions(config = {}, body) {
+  return Object.assign({}, config, { body });
+}
+const request = {
+  get(url, config = {}) {
+    const serverURI = mergeURI(url, config.params);
+    const newConfig = mergeOptions(config);
+    return fetch(serverURI, { method: "get", ...newConfig }).then((res) => {
+      if (res.status === 200) {
+        return res.json();
+      } else {
+        Promise.reject(res);
+      }
+    });
+  },
+  post(url, data, config = {}) {
+    const serverURI = mergeURI(url, config.params);
+    const newConfig = mergeOptions(config, data);
+    return fetch(serverURI, { method: "post", ...newConfig }).then((res) => {
+      if (res.status === 200) {
+        return res.json();
+      } else {
+        Promise.reject(res);
+      }
+    });
+  },
+  put() {},
+  delete() {},
+};
 
 export { request };

@@ -1,5 +1,4 @@
-import Layout from "@/layout/index.vue";
-
+const Layout = () => import("@/layout/index.vue");
 const homeRoute = {
   path: "/",
   component: Layout,
