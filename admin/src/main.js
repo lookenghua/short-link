@@ -1,5 +1,6 @@
 import "./assets/css/global.css";
 import "normalize.css/normalize.css";
+import "uno.css";
 import { createApp } from "vue";
 import { router, setupRouter } from "./router";
 import { setupGlobComponents } from "./components";
