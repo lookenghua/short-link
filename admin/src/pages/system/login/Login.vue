@@ -76,11 +76,16 @@
 import { onMounted, reactive, ref } from "vue";
 import { useLocalStorage } from "@/hooks/storage.js";
 import init, { md5encrypt } from "wasm-utils";
+import { useUserStore } from "@/store/modules/user";
+import { useRouter } from "vue-router";
+
 const formRef = ref(null);
 const rememberPass = ref(false);
 const loading = ref(false);
 
 init();
+const userStore = useUserStore();
+const router = useRouter();
 const accountStorage = useLocalStorage("account");
 const headStyle = {
   border: "none",
@@ -93,8 +98,8 @@ const bodyStyle = {
   padding: "20px 30px",
 };
 const modelRef = reactive({
-  username: "",
-  password: "",
+  username: "admin",
+  password: "123456",
 });
 const rulesRef = reactive({
   username: [
@@ -124,8 +129,18 @@ function submit(e) {
   e.preventDefault();
   formRef.value?.validate((errors) => {
     if (!errors) {
-      console.log(modelRef);
-      console.log(md5encrypt(modelRef.password));
+      const data = {
+        username: modelRef.username,
+        password: md5encrypt(modelRef.password),
+      };
+      userStore.login(data).subscribe(
+        () => {
+          router.push("/");
+        },
+        (e) => {
+          console.log(e);
+        }
+      );
     }
   });
 }

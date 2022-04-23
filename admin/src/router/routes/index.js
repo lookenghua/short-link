@@ -15,11 +15,6 @@ Object.keys(modulesFiles).forEach((it) => {
 
 export { asyncRoutes };
 
-const rootRoute = {
-  path: "/",
-  redirect: "/login",
-};
-
 const LoginRoute = {
   path: "/login",
   name: "LoginPage",
@@ -31,4 +26,4 @@ const LoginRoute = {
 
 // eslint-disable-next-line no-unused-vars
 const PageNotFoundRoute = {};
-export const basicRoutes = [rootRoute, LoginRoute];
+export const basicRoutes = [LoginRoute];

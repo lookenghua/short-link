@@ -1,53 +1,61 @@
-import URI from "urijs";
-const defaultOptions = {
-  baseURL: String(import.meta.env.VITE_API_URL),
-};
+import { HttpClient, HttpFetchBackend, setupConfig } from "@ngify/http";
+import { catchError, finalize, tap, throwError } from "rxjs";
+import { getToken } from "@/utils/auth";
 
-/**
- * 合并地址
- * @param {string} url  - 接口地址
- * @param {Object} params  - 参数
- * @return {string}
- */
-function mergeURI(url, params = {}) {
-  if (url.startsWith("http")) {
-    return url;
-  }
-  const u = new URI(new URL(url, defaultOptions.baseURL).toString());
-  for (let key in params) {
-    u.addQuery(key, params[key]);
-  }
-  return u.toString();
-}
-// 参数合并
-function mergeOptions(config = {}, body) {
-  return Object.assign({}, config, { body });
-}
-const request = {
-  get(url, config = {}) {
-    const serverURI = mergeURI(url, config.params);
-    const newConfig = mergeOptions(config);
-    return fetch(serverURI, { method: "get", ...newConfig }).then((res) => {
-      if (res.status === 200) {
-        return res.json();
-      } else {
-        Promise.reject(res);
+setupConfig({
+  backend: new HttpFetchBackend(),
+});
+
+const request = new HttpClient([
+  {
+    intercept(req, next) {
+      // Clone the request to modify request parameters
+      const token = getToken();
+      req = req.clone({
+        url: `${import.meta.env.VITE_API_URL}${req.url}`,
+      });
+      if (req.method === "POST") {
+        req = req.clone({
+          headers: req.headers.set("Content-Type", `application/json`),
+        });
       }
-    });
-  },
-  post(url, data, config = {}) {
-    const serverURI = mergeURI(url, config.params);
-    const newConfig = mergeOptions(config, data);
-    return fetch(serverURI, { method: "post", ...newConfig }).then((res) => {
-      if (res.status === 200) {
-        return res.json();
-      } else {
-        Promise.reject(res);
+      if (token) {
+        req = req.clone({
+          headers: req.headers.set("Authorization", `bearer ${token}`),
+        });
       }
-    });
+
+      return next.handle(req);
+    },
   },
-  put() {},
-  delete() {},
-};
+  {
+    intercept(req, next) {
+      const started = Date.now();
+      let ok;
+      return next.handle(req).pipe(
+        tap(
+          // Succeeds when there is a response; ignore other events
+          (res) => {
+            ok = "success";
+            const body = res.body;
+            if (!body.success) {
+              throw new Error(JSON.stringify(body));
+            }
+          },
+          // Operation failed; error is an HttpErrorResponse
+          () => (ok = "failed")
+        ),
+        catchError((err) => {
+          return throwError(err);
+        }),
+        finalize(() => {
+          const elapsed = Date.now() - started;
+          const msg = `${req.method} "${req.urlWithParams}" ${ok} in ${elapsed} ms.`;
+          console.log(msg);
+        })
+      );
+    },
+  },
+]);
 
 export { request };

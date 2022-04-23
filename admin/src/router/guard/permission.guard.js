@@ -29,7 +29,7 @@ export function createPermissionGuard(router) {
         console.log("===正在获取用户信息");
         try {
           NProgress.inc();
-          const res = await getCurrentAdminInfo();
+          const res = await getCurrentAdminInfo().toPromise();
           userStore.setUserInfo(res.data);
         } catch (e) {
           console.error(e);

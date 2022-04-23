@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
-import { login } from "../../api/user";
+import { userLogin } from "@/api/user";
 import { useLocalStorage, useSessionStorage } from "@vueuse/core";
+import { tap } from "rxjs";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -22,9 +23,11 @@ export const useUserStore = defineStore("user", {
   actions: {
     // 登录
     login(data) {
-      return login(data).then((res) => {
-        this.token = res.data;
-      });
+      return userLogin(data).pipe(
+        tap((res) => {
+          this.token = res.data;
+        })
+      );
     },
     // 设置管理员信息
     setUserInfo(data) {

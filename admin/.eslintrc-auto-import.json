@@ -6,6 +6,7 @@
     "NConfigProvider": true,
     "NForm": true,
     "NFormItem": true,
-    "NInput": true
+    "NInput": true,
+    "NMessageProvider": true
   }
 }

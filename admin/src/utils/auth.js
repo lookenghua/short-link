@@ -1,4 +1,4 @@
-import { TOKEN_KEY } from "../enums/cache.enum";
+const TOKEN_KEY = "token";
 
 // 获取token
 export function getToken() {
