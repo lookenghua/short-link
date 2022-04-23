@@ -243,6 +243,9 @@ watch(
       .filter((it) => it.children.length > 0)
       .map((it) => it.path);
     layoutStore.openKeys = arr;
+    if (["/login"].includes(current.path)) {
+      return;
+    }
     const view = {
       fullPath: current.fullPath,
       meta: current.meta,

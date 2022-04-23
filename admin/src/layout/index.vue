@@ -34,7 +34,9 @@ import Lottie from "@/components/Lottie/Lottie.vue";
 
 const layoutStore = useLayoutStore();
 const appStore = useAppStore();
-const includes = computed(() => layoutStore.visitedViews.map((it) => it.name));
+const includes = computed(() =>
+  layoutStore.visitedViews.map((it) => it.name).filter((it) => !!it)
+);
 const leftDistance = computed(() => (layoutStore.collapsed ? "49px" : "201px"));
 </script>
 

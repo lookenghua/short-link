@@ -49,7 +49,7 @@ export function createPermissionGuard(router) {
         next({ ...to, replace: true });
         NProgress.inc();
       } else {
-        if (to.path === "/login") {
+        if (to.path === "/login" || to.path === "/") {
           next({ path: "/dashboard" });
         } else {
           next(true);
