@@ -41,7 +41,12 @@
         :inline="true"
       />
     </div>
-    <a-dropdown overlay-class-name="right-menu">
+    <n-dropdown
+      trigger="hover"
+      :options="options"
+      :render-icon="renderIcon"
+      @select="(key) => handleTagMenuItemClick(activeIndex, key)"
+    >
       <div class="btn-item">
         <Icon
           icon="ant-design:down-outlined"
@@ -51,134 +56,7 @@
           :inline="true"
         />
       </div>
-      <template #overlay>
-        <a-menu>
-          <a-menu-item
-            key="reload"
-            @click="handleTagMenuItemClick(activeIndex, 'reload')"
-          >
-            <div class="inline-flex items-center">
-              <Icon
-                icon="ant-design:reload-outlined"
-                color="rgba(0, 0, 0, 0.85)"
-                width="18"
-                height="18"
-                :inline="true"
-              />
-              <span class="ml-1">重新加载</span>
-            </div>
-          </a-menu-item>
-          <a-menu-item
-            key="close"
-            :disabled="!canClosePage"
-            @click="handleTagMenuItemClick(activeIndex, 'close')"
-          >
-            <div class="inline-flex items-center">
-              <Icon
-                v-if="!canClosePage"
-                icon="ant-design:close-outlined"
-                color="rgba(0, 0, 0, 0.25)"
-                width="18"
-                height="18"
-                :inline="true"
-              />
-              <Icon
-                v-else
-                icon="ant-design:close-outlined"
-                color="rgba(0, 0, 0, 0.85)"
-                width="18"
-                height="18"
-                :inline="true"
-              />
-              <span class="ml-1">关闭标签页</span>
-            </div>
-          </a-menu-item>
-          <a-menu-divider />
-          <a-menu-item
-            key="closeLeft"
-            :disabled="!canCloseLeftPage"
-            @click="handleTagMenuItemClick(activeIndex, 'closeLeft')"
-          >
-            <div class="inline-flex items-center">
-              <Icon
-                v-if="!canCloseLeftPage"
-                icon="icon-park-outline:to-left"
-                color="rgba(0, 0, 0, 0.25)"
-                width="18"
-                height="18"
-                :inline="true"
-              />
-              <Icon
-                v-else
-                icon="icon-park-outline:to-left"
-                color="rgba(0, 0, 0, 0.85)"
-                width="18"
-                height="18"
-                :inline="true"
-              />
-              <span class="ml-1">关闭左侧标签页</span>
-            </div>
-          </a-menu-item>
-          <a-menu-item
-            key="closeRight"
-            :disabled="!canCloseRightPage"
-            @click="handleTagMenuItemClick(activeIndex, 'closeRight')"
-          >
-            <div class="inline-flex items-center">
-              <Icon
-                v-if="!canCloseRightPage"
-                icon="icon-park-outline:to-right"
-                color="rgba(0, 0, 0, 0.25)"
-                width="18"
-                height="18"
-                :inline="true"
-              />
-              <Icon
-                v-else
-                icon="icon-park-outline:to-right"
-                color="rgba(0, 0, 0, 0.85)"
-                width="18"
-                height="18"
-                :inline="true"
-              />
-              <span class="ml-1">关闭右侧标签页</span>
-            </div>
-          </a-menu-item>
-          <a-menu-divider />
-          <a-menu-item
-            key="closeOther"
-            @click="handleTagMenuItemClick(activeIndex, 'closeOther')"
-          >
-            <div class="inline-flex items-center">
-              <Icon
-                icon="icon-park-outline:distribute-vertically"
-                color="rgba(0, 0, 0, 0.85)"
-                width="18"
-                height="18"
-                :inline="true"
-              />
-              <span class="ml-1"> 关闭其他标签页</span>
-            </div>
-          </a-menu-item>
-          <a-menu-item
-            key="closeAll"
-            @click="handleTagMenuItemClick(activeIndex, 'closeAll')"
-          >
-            <div class="inline-flex items-center">
-              <Icon
-                icon="ci:line-l"
-                :rotate="1"
-                color="rgba(0, 0, 0, 0.85)"
-                width="18"
-                height="18"
-                :inline="true"
-              />
-              <span class="ml-1">关闭全部标签页</span>
-            </div>
-          </a-menu-item>
-        </a-menu>
-      </template>
-    </a-dropdown>
+    </n-dropdown>
   </div>
 </template>
 <script>
@@ -189,12 +67,13 @@ export default defineComponent({
 });
 </script>
 <script setup>
-import { computed, onMounted, ref, toRaw, watch } from "vue";
+import { computed, onMounted, ref, toRaw, watch, h } from "vue";
 import { useAppStore } from "@/store/modules/app.js";
 import { useLayoutStore } from "@/store/modules/layout";
 import { useRoute, useRouter } from "vue-router";
 import Sortable from "sortablejs";
 import Tag from "./Tag.vue";
+import { Icon } from "@iconify/vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -202,7 +81,46 @@ const layoutStore = useLayoutStore();
 const appStore = useAppStore();
 
 let tabsRef = ref(null);
-
+// 列表
+const options = ref([
+  {
+    label: "重新加载",
+    key: "reload",
+    disabled: false,
+  },
+  {
+    label: "关闭标签页",
+    key: "close",
+    disabled: false,
+  },
+  {
+    type: "divider",
+    key: "divider1",
+  },
+  {
+    label: "关闭左侧标签页",
+    key: "closeLeft",
+    disabled: false,
+  },
+  {
+    label: "关闭右侧标签页",
+    key: "closeRight",
+    disabled: false,
+  },
+  {
+    type: "divider",
+    key: "divider2",
+  },
+  {
+    label: "关闭其他标签页",
+    key: "closeOther",
+    disabled: false,
+  },
+  {
+    label: "关闭全部标签页",
+    key: "closeAll",
+  },
+]);
 const visitedViews = computed(() => layoutStore.visitedViews);
 const affixVisitedViews = computed(() =>
   layoutStore.visitedViews.filter((it) => it.meta?.affix)
@@ -212,7 +130,7 @@ const unaffixVisitedViews = computed(() =>
 );
 const activeIndex = computed(() => layoutStore.activeVisitedIndex);
 const activeView = computed(() => layoutStore.activeView);
-const canClosePage = computed(() => !activeView.value.meta?.affix);
+const canClosePage = computed(() => !activeView.value?.meta?.affix);
 // 是否可以关闭左侧菜单
 const canCloseLeftPage = computed(() =>
   layoutStore.visitedViews.some(
@@ -234,15 +152,20 @@ let activeKey = computed({
     layoutStore.setActiveTag(val);
   },
 });
-
+// 监听多个状态
+watch(
+  () => [canClosePage, canCloseLeftPage, canCloseRightPage],
+  () => {
+    options.value[1].disabled = !canClosePage.value;
+    options.value[3].disabled = !canCloseLeftPage.value;
+    options.value[4].disabled = !canCloseRightPage.value;
+  },
+  { immediate: true }
+);
 watch(
   route,
   (current) => {
-    const matched = current.matched;
-    const arr = matched
-      .filter((it) => it.children.length > 0)
-      .map((it) => it.path);
-    layoutStore.openKeys = arr;
+    layoutStore.openKeys = current.name;
     if (["/login"].includes(current.path)) {
       return;
     }
@@ -301,8 +224,80 @@ function closeMenu(index) {
 
 // 点击按钮
 function handleMenuItemClick(path) {
-  console.log(path);
   activeKey.value = path;
+}
+
+// 渲染图标
+function renderIcon(option) {
+  let icon = null;
+  if (option.key === "reload") {
+    icon = {
+      icon: "ant-design:reload-outlined",
+      color: "rgba(0, 0, 0, 0.85)",
+      width: 18,
+      height: 18,
+      inline: true,
+    };
+    if (option.disabled) {
+      icon.color = "rgba(0, 0, 0, 0.25)";
+    }
+  }
+  if (option.key === "close") {
+    icon = {
+      icon: "ant-design:close-outlined",
+      color: "rgba(0, 0, 0, 0.85)",
+      width: 18,
+      height: 18,
+      inline: true,
+    };
+    if (option.disabled) {
+      icon.color = "rgba(0, 0, 0, 0.25)";
+    }
+  }
+  if (option.key === "closeLeft") {
+    icon = {
+      icon: "icon-park-outline:to-left",
+      color: "rgba(0, 0, 0, 0.85)",
+      width: 18,
+      height: 18,
+      inline: true,
+    };
+    if (option.disabled) {
+      icon.color = "rgba(0, 0, 0, 0.25)";
+    }
+  }
+  if (option.key === "closeRight") {
+    icon = {
+      icon: "icon-park-outline:to-right",
+      color: "rgba(0, 0, 0, 0.85)",
+      width: 18,
+      height: 18,
+      inline: true,
+    };
+  }
+  if (option.key === "closeOther") {
+    icon = {
+      icon: "icon-park-outline:distribute-vertically",
+      color: "rgba(0, 0, 0, 0.85)",
+      width: 18,
+      height: 18,
+      inline: true,
+    };
+    if (option.disabled) {
+      icon.color = "rgba(0, 0, 0, 0.25)";
+    }
+  }
+  if (option.key === "closeAll") {
+    icon = {
+      icon: "ci:line-l",
+      rotate: 1,
+      color: "#333",
+      width: 18,
+      height: 18,
+      inline: true,
+    };
+  }
+  return h(Icon, icon);
 }
 
 onMounted(() => {
@@ -327,7 +322,6 @@ onMounted(() => {
       } else {
         arr.splice(newIndex, 0, oldItem);
       }
-      console.log(oldIndex, newIndex, arr);
       layoutStore.visitedViews = arr;
     },
   });

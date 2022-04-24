@@ -2,6 +2,7 @@ const Layout = () => import("@/layout/index.vue");
 const homeRoute = {
   path: "/",
   component: Layout,
+  name: "Home",
   meta: {
     title: "首页",
     icon: "mdi-light:home",

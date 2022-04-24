@@ -9,7 +9,7 @@ export const useLayoutStore = defineStore("layout", {
     cachedViews: [], // 缓存的页面
     activeTag: "", // 选中的标签
     activeMenu: [""], // 选中的菜单
-    openKeys: [], //当前展开的 SubMenu 菜单项 key 数组
+    openKeys: "", //当前展开的 SubMenu 菜单项 key 数组
   }),
   getters: {
     lastVisitedView(state) {

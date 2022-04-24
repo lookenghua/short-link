@@ -3,10 +3,7 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import Components from "unplugin-vue-components/vite";
-import {
-  AntDesignVueResolver,
-  NaiveUiResolver,
-} from "unplugin-vue-components/resolvers";
+import { NaiveUiResolver } from "unplugin-vue-components/resolvers";
 import AutoImport from "unplugin-auto-import/vite";
 import Unocss from "unocss/vite";
 
@@ -17,7 +14,7 @@ export default defineConfig({
     vueJsx(),
     Unocss(),
     Components({
-      resolvers: [AntDesignVueResolver(), NaiveUiResolver()],
+      resolvers: [NaiveUiResolver()],
       dts: true,
       include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
     }),
@@ -29,7 +26,7 @@ export default defineConfig({
         /\.md$/, // .md
       ],
       imports: [],
-      resolvers: [AntDesignVueResolver(), NaiveUiResolver()],
+      resolvers: [NaiveUiResolver()],
       eslintrc: {
         enabled: true, // Default `false`
         globalsPropValue: true, // Default `true`, (true | false | 'readonly' | 'readable' | 'writable' | 'writeable')

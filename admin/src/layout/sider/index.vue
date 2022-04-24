@@ -1,25 +1,28 @@
 <template>
-  <a-layout-sider
-    v-model:collapsed="collapsed"
-    :collapsedWidth="48"
-    :trigger="null"
-    collapsible
+  <n-layout-sider
+    collapse-mode="width"
+    :collapsed-width="48"
+    :width="200"
+    :collapsed="collapsed"
+    @collapse="collapsed = true"
+    @expand="collapsed = false"
     class="sider"
+    :inverted="true"
   >
     <div class="logo-area flex">
       <img src="../../assets/images/logo.png" alt="" class="logo" />
       <span class="title">博客管理后台</span>
     </div>
-    <a-menu
-      v-model:selectedKeys="selectedKeys"
-      v-model:openKeys="openKeys"
-      theme="dark"
-      mode="inline"
-      @click="handleMenuClick"
-    >
-      <MenuItem v-for="item in routes" :key="item.path" :route="item" />
-    </a-menu>
-  </a-layout-sider>
+    <n-menu
+      :collapsed="collapsed"
+      :collapsed-width="64"
+      :collapsed-icon-size="22"
+      :options="menus"
+      :value="openKeys"
+      @update:expanded-keys="handleUpdateExpandedKeys"
+      @update:value="handleMenuClick"
+    />
+  </n-layout-sider>
 </template>
 <script>
 import { defineComponent } from "vue";
@@ -27,29 +30,30 @@ import { defineComponent } from "vue";
 export default defineComponent({ name: "LayoutSider" });
 </script>
 <script setup>
-import { computed } from "vue";
+import { computed, ref, toRaw } from "vue";
 import { useLayoutStore } from "@/store/modules/layout";
 import { usePermissionStore } from "@/store/modules/perssion";
-import MenuItem from "./components/MenuItem.vue";
-
+import { generatorMenu } from "@/utils";
 const layoutStore = useLayoutStore();
 const permissionStore = usePermissionStore();
+const menus = ref([]);
+
 let openKeys = computed({
   get() {
-    return layoutStore.collapsed ? [] : layoutStore.openKeys;
+    return layoutStore.openKeys;
   },
   set(val) {
     layoutStore.openKeys = val;
   },
 });
-const selectedKeys = computed({
-  get() {
-    return layoutStore.activeMenu;
-  },
-  set(val) {
-    layoutStore.setActiveMenu(val);
-  },
-});
+// const selectedKeys = computed({
+//   get() {
+//     return layoutStore.activeMenu;
+//   },
+//   set(val) {
+//     layoutStore.setActiveMenu(val);
+//   },
+// });
 
 const collapsed = computed({
   get() {
@@ -63,56 +67,46 @@ const routes = permissionStore.permissionRoutes.sort(
   (a, b) => a.meta.sort - b.meta.sort
 );
 
+menus.value = generatorMenu(toRaw(routes));
+
 // 点击菜单
-function handleMenuClick({ key }) {
+function handleMenuClick(key) {
   console.log(`当前点击菜单: ${key}`);
 }
-</script>
 
+// 展开菜单
+function handleUpdateExpandedKeys(keys) {
+  console.log(keys);
+}
+</script>
 <style scoped lang="scss">
 .sider {
   height: 100vh;
-  color: white;
-  position: fixed;
-  left: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   .logo-area {
-    color: white;
     padding: 10px 5px;
     white-space: nowrap;
     overflow: hidden;
+    width: 200px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     .logo {
       width: 38px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-right: 5px;
     }
 
     .title {
       display: inline-block;
-      margin-left: 5px;
       font-size: 20px;
       padding-top: 5px;
       opacity: 1;
-      transition: opacity 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), margin 0.3s,
-        color 0.3s;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
-
-  .ant-layout-sider-collapsed {
-    --icon-size: 40px;
-  }
-
-  .ant-menu-inline-collapsed {
-    ::v-deep(.ant-menu-item) {
-      display: flex;
-      //line-height: 48px;
-    }
-  }
-}
-</style>
-<style lang="scss">
-.ant-menu-submenu-popup {
-  .ant-menu-item {
-    display: flex;
+  ::v-deep(.n-menu-item-content__icon) {
+    color: white;
   }
 }
 </style>

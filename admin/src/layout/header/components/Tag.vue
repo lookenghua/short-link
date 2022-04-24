@@ -1,6 +1,6 @@
 <template>
-  <a-dropdown :trigger="['contextmenu']" overlay-class-name="right-menu">
-    <div class="tab">
+  <div>
+    <div class="tab" @contextmenu="handleContextMenu">
       <span>{{ info.meta?.title }} </span>
       <Icon
         v-if="!info.meta?.affix"
@@ -12,163 +12,31 @@
         @click.stop="handleTagMenuItemClick('close')"
       />
     </div>
-    <template #overlay>
-      <a-menu>
-        <a-menu-item
-          key="reload"
-          :disabled="!canReloadPage"
-          @click="handleTagMenuItemClick('reload')"
-        >
-          <div class="inline-flex items-center">
-            <Icon
-              v-if="!canReloadPage"
-              icon="ant-design:reload-outlined"
-              color="rgba(0, 0, 0, 0.25)"
-              width="18"
-              height="18"
-              :inline="true"
-            />
-            <Icon
-              v-else
-              icon="ant-design:reload-outlined"
-              color="rgba(0, 0, 0, 0.85)"
-              width="18"
-              height="18"
-              :inline="true"
-            />
-
-            <span class="ml-1">重新加载</span>
-          </div>
-        </a-menu-item>
-        <a-menu-item
-          key="close"
-          :disabled="!canClosePage"
-          @click="handleTagMenuItemClick('close')"
-        >
-          <div class="inline-flex items-center">
-            <Icon
-              v-if="!canClosePage"
-              icon="ant-design:close-outlined"
-              color="rgba(0, 0, 0, 0.25)"
-              width="18"
-              height="18"
-              :inline="true"
-            />
-            <Icon
-              v-else
-              icon="ant-design:close-outlined"
-              color="rgba(0, 0, 0, 0.85)"
-              width="18"
-              height="18"
-              :inline="true"
-            />
-            <span class="ml-1">关闭标签页</span>
-          </div>
-        </a-menu-item>
-        <a-menu-divider />
-        <a-menu-item
-          key="closeLeft"
-          :disabled="!canCloseLeftPage"
-          @click="handleTagMenuItemClick('closeLeft')"
-        >
-          <div class="inline-flex items-center">
-            <Icon
-              v-if="!canCloseLeftPage"
-              icon="icon-park-outline:to-left"
-              color="rgba(0, 0, 0, 0.25)"
-              width="18"
-              height="18"
-              :inline="true"
-            />
-            <Icon
-              v-else
-              icon="icon-park-outline:to-left"
-              color="rgba(0, 0, 0, 0.85)"
-              width="18"
-              height="18"
-              :inline="true"
-            />
-            <span class="ml-1">关闭左侧标签页</span>
-          </div>
-        </a-menu-item>
-        <a-menu-item
-          key="closeRight"
-          :disabled="!canCloseRightPage"
-          @click="handleTagMenuItemClick('closeRight')"
-        >
-          <div class="inline-flex items-center">
-            <Icon
-              v-if="!canCloseRightPage"
-              icon="icon-park-outline:to-right"
-              color="rgba(0, 0, 0, 0.25)"
-              width="18"
-              height="18"
-              :inline="true"
-            />
-            <Icon
-              v-else
-              icon="icon-park-outline:to-right"
-              color="rgba(0, 0, 0, 0.85)"
-              width="18"
-              height="18"
-              :inline="true"
-            />
-            <span class="ml-1">关闭右侧标签页</span>
-          </div>
-        </a-menu-item>
-        <a-menu-divider />
-        <a-menu-item
-          key="closeOther"
-          :disabled="!isActive"
-          @click="handleTagMenuItemClick('closeOther')"
-        >
-          <div class="inline-flex items-center">
-            <Icon
-              v-if="!isActive"
-              icon="icon-park-outline:distribute-vertically"
-              color="rgba(0, 0, 0, 0.25)"
-              width="18"
-              height="18"
-              :inline="true"
-            />
-            <Icon
-              v-else
-              icon="icon-park-outline:distribute-vertically"
-              color="rgba(0, 0, 0, 0.85)"
-              width="18"
-              height="18"
-              :inline="true"
-            />
-            <span class="ml-1"> 关闭其他标签页</span>
-          </div>
-        </a-menu-item>
-        <a-menu-item key="closeAll" @click="handleTagMenuItemClick('closeAll')">
-          <div class="inline-flex items-center">
-            <Icon
-              icon="ci:line-l"
-              :rotate="1"
-              color="#333"
-              width="18"
-              height="18"
-              :inline="true"
-            />
-            <span class="ml-1">关闭全部标签页</span>
-          </div>
-        </a-menu-item>
-      </a-menu>
-    </template>
-  </a-dropdown>
+    <n-dropdown
+      placement="bottom-start"
+      trigger="manual"
+      :x="xRef"
+      :y="yRef"
+      :options="options"
+      :show="showDropdown"
+      :render-icon="renderIcon"
+      @select="handleTagMenuItemClick"
+      @clickoutside="showDropdown = false"
+    >
+    </n-dropdown>
+  </div>
 </template>
 <script>
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: "TagPage",
+  name: "TagItem",
 });
 </script>
 <script setup>
-import { computed, toRefs } from "vue";
+import { computed, nextTick, toRefs, ref, h, watch } from "vue";
 import { useLayoutStore } from "@/store/modules/layout";
+import { Icon } from "@iconify/vue/dist/iconify";
 
 const props = defineProps({
   info: {
@@ -178,6 +46,9 @@ const props = defineProps({
 });
 const emits = defineEmits(["menu"]);
 const { info } = toRefs(props);
+const showDropdown = ref(false);
+const xRef = ref(0);
+const yRef = ref(0);
 const layoutStore = useLayoutStore();
 const activeKey = computed(() => layoutStore.activeTag);
 const isActive = computed(() => layoutStore.activeTag === info.value.fullPath);
@@ -186,6 +57,46 @@ const pageIndex = computed(() =>
     (it) => it.fullPath === info.value.fullPath
   )
 );
+// 列表
+const options = ref([
+  {
+    label: "重新加载",
+    key: "reload",
+    disabled: false,
+  },
+  {
+    label: "关闭标签页",
+    key: "close",
+    disabled: false,
+  },
+  {
+    type: "divider",
+    key: "divider1",
+  },
+  {
+    label: "关闭左侧标签页",
+    key: "closeLeft",
+    disabled: false,
+  },
+  {
+    label: "关闭右侧标签页",
+    key: "closeRight",
+    disabled: false,
+  },
+  {
+    type: "divider",
+    key: "divider2",
+  },
+  {
+    label: "关闭其他标签页",
+    key: "closeOther",
+    disabled: false,
+  },
+  {
+    label: "关闭全部标签页",
+    key: "closeAll",
+  },
+]);
 // 是否可以重新加载
 const canReloadPage = computed(() => activeKey.value === info.value.fullPath);
 // 是否可以关闭页面
@@ -204,13 +115,126 @@ const canCloseRightPage = computed(
       (it, i) => i > pageIndex.value && !it.meta?.affix
     ) && isActive.value
 );
+
+// 监听多个状态
+watch(
+  () => [
+    canReloadPage,
+    canClosePage,
+    canCloseLeftPage,
+    canCloseRightPage,
+    isActive,
+  ],
+  () => {
+    options.value[0].disabled = !canReloadPage.value;
+    options.value[1].disabled = !canClosePage.value;
+    options.value[3].disabled = !canCloseLeftPage.value;
+    options.value[4].disabled = !canCloseRightPage.value;
+    options.value[6].disabled = !isActive.value;
+  },
+  { immediate: true }
+);
+
 // 关闭菜单
 function handleTagMenuItemClick(directive) {
   emits("menu", directive);
+  showDropdown.value = false;
+}
+
+// 右键
+function handleContextMenu(e) {
+  e.preventDefault();
+  showDropdown.value = false;
+  nextTick().then(() => {
+    showDropdown.value = true;
+    xRef.value = e.clientX;
+    yRef.value = e.clientY;
+  });
+}
+
+// 渲染图标
+function renderIcon(option) {
+  let icon = null;
+  if (option.key === "reload") {
+    icon = {
+      icon: "ant-design:reload-outlined",
+      color: "rgba(0, 0, 0, 0.85)",
+      width: 18,
+      height: 18,
+      inline: true,
+    };
+    if (option.disabled) {
+      icon.color = "rgba(0, 0, 0, 0.25)";
+    }
+  }
+  if (option.key === "close") {
+    icon = {
+      icon: "ant-design:close-outlined",
+      color: "rgba(0, 0, 0, 0.85)",
+      width: 18,
+      height: 18,
+      inline: true,
+    };
+    if (option.disabled) {
+      icon.color = "rgba(0, 0, 0, 0.25)";
+    }
+  }
+  if (option.key === "closeLeft") {
+    icon = {
+      icon: "icon-park-outline:to-left",
+      color: "rgba(0, 0, 0, 0.85)",
+      width: 18,
+      height: 18,
+      inline: true,
+    };
+    if (option.disabled) {
+      icon.color = "rgba(0, 0, 0, 0.25)";
+    }
+  }
+  if (option.key === "closeRight") {
+    icon = {
+      icon: "icon-park-outline:to-right",
+      color: "rgba(0, 0, 0, 0.85)",
+      width: 18,
+      height: 18,
+      inline: true,
+    };
+  }
+  if (option.key === "closeOther") {
+    icon = {
+      icon: "icon-park-outline:distribute-vertically",
+      color: "rgba(0, 0, 0, 0.85)",
+      width: 18,
+      height: 18,
+      inline: true,
+    };
+    if (option.disabled) {
+      icon.color = "rgba(0, 0, 0, 0.25)";
+    }
+  }
+  if (option.key === "closeAll") {
+    icon = {
+      icon: "ci:line-l",
+      rotate: 1,
+      color: "#333",
+      width: 18,
+      height: 18,
+      inline: true,
+    };
+  }
+  return h(Icon, icon);
 }
 </script>
 
 <style scoped lang="scss">
+.active-tab {
+  .tab {
+    background: #42b983;
+    color: white;
+    border-color: #42b983;
+  }
+}
+
 .tab {
   height: 28px;
   padding-right: 10px;
@@ -220,12 +244,6 @@ function handleTagMenuItemClick(directive) {
   border: 1px solid #d9d9d9;
   margin-right: 4px;
   cursor: pointer;
-
-  &.active-tab {
-    background: #42b983;
-    color: white;
-    border-color: #42b983;
-  }
 
   .icon-close {
     line-height: 1;

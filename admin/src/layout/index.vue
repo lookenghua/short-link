@@ -1,9 +1,9 @@
 <template>
-  <a-layout class="layout">
+  <n-layout has-sider class="layout" position="absolute">
     <LayoutSider />
-    <a-layout>
-      <LayoutHeader />
-      <a-layout-content class="app-main">
+    <n-layout>
+      <n-layout-header> <LayoutHeader /></n-layout-header>
+      <n-layout-content content-style="padding: 24px;" class="app-main">
         <router-view v-slot="{ Component }" v-if="appStore.showRouterView">
           <keep-alive :include="includes">
             <component :is="Component" />
@@ -14,9 +14,9 @@
           :animation-data="animationData"
           style="width: 400px; height: 400px; margin: 100px auto 0"
         />
-      </a-layout-content>
-    </a-layout>
-  </a-layout>
+      </n-layout-content>
+    </n-layout>
+  </n-layout>
 </template>
 <script>
 import { defineComponent } from "vue";
@@ -37,15 +37,12 @@ const appStore = useAppStore();
 const includes = computed(() =>
   layoutStore.visitedViews.map((it) => it.name).filter((it) => !!it)
 );
-const leftDistance = computed(() => (layoutStore.collapsed ? "49px" : "201px"));
 </script>
 
 <style scoped lang="scss">
 .layout {
   .app-main {
     min-height: calc(100vh - 130px);
-    margin: 81px 0 0;
-    margin-left: v-bind(leftDistance);
     transition: all 0.2s;
     background: white;
 

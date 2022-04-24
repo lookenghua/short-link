@@ -13,31 +13,27 @@
     <FlipClock />
     <div
       v-if="showModal"
-      class="absolute top-0 left-0 w-full h-full bg-black bg-opacity-80 z-30"
+      class="absolute top-0 left-0 w-full h-full bg-black bg-opacity-80 z-30 flex items-center justify-center"
     >
-      <div
-        class="absolute left-1/2 bottom-1/2 flex flex-col items-center justify-center"
-      >
-        <a-avatar :size="64" class="align-text-bottom">
-          <template #icon>
-            <Icon
-              icon="ant-design:user-outlined"
-              width="24"
-              height="24"
-              :inline="true"
-            />
-          </template>
-        </a-avatar>
-        <div class="text-lg text-white mb-3">lookenghua</div>
-        <a-form>
-          <a-form-item v-bind="validateInfos.password">
-            <a-input-password
+      <div class="relative top--4 flex flex-col items-center justify-center">
+        <OpenData size="20" type="avatar" class="align-text-bottom" />
+        <OpenData type="username" class="text-lg text-white mb-3" />
+        <n-form
+          label-placement="left"
+          :model="dialogFormRef"
+          :rules="rulesRef"
+          ref="formRef"
+        >
+          <n-form-item path="password">
+            <n-input
+              type="password"
               v-model:value="dialogFormRef.password"
               placeholder="请输入锁屏密码"
-              @focus="clearValidate()"
+              show-password-on="mousedown"
+              @focus="clearValidate"
             />
-          </a-form-item>
-        </a-form>
+          </n-form-item>
+        </n-form>
         <div class="flex items-center justify-between w-full mt-2">
           <span class="text-blue-600 cursor-pointer" @click="showModal = false"
             >返回</span
@@ -61,14 +57,13 @@ export default defineComponent({
 });
 </script>
 <script setup>
-import { Form } from "ant-design-vue";
 import { onMounted, reactive, ref } from "vue";
 import { useAppStore } from "@/store/modules/app.js";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user.js";
 import FlipClock from "@/components/FlipClock";
 
-const useForm = Form.useForm;
+const formRef = ref(null);
 const appStore = useAppStore();
 const router = useRouter();
 let showModal = ref(false);
@@ -89,17 +84,19 @@ const rulesRef = reactive({
     },
   ],
 });
-const { clearValidate, validate, validateInfos, resetFields } = useForm(
-  dialogFormRef,
-  rulesRef
-);
-
 // 解锁
 function unlock() {
-  validate().then(() => {
-    resetFields();
-    appStore.lockScreenPassword = null;
+  formRef.value?.validate().then((errors) => {
+    if (!errors) {
+      appStore.lockScreenPassword = null;
+      clearValidate();
+    }
   });
+}
+
+// 清除校验信息
+function clearValidate() {
+  formRef.value?.restoreValidation();
 }
 
 // 返回登录
@@ -112,5 +109,3 @@ function logout() {
 
 onMounted(() => {});
 </script>
-
-<style scoped></style>

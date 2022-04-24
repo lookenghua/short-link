@@ -1494,7 +1494,7 @@ packages:
     name: axios
     version: 0.21.4
     dependencies:
-      follow-redirects: registry.npmmirror.com/follow-redirects/1.14.9_debug@4.3.2
+      follow-redirects: registry.npmmirror.com/follow-redirects/1.14.9
     transitivePeerDependencies:
       - debug
     dev: true
@@ -1504,7 +1504,7 @@ packages:
     name: axios
     version: 0.26.1
     dependencies:
-      follow-redirects: registry.npmmirror.com/follow-redirects/1.14.9_debug@4.3.2
+      follow-redirects: registry.npmmirror.com/follow-redirects/1.14.9
     transitivePeerDependencies:
       - debug
     dev: true
@@ -2891,9 +2891,8 @@ packages:
     version: 3.2.5
     dev: true
 
-  registry.npmmirror.com/follow-redirects/1.14.9_debug@4.3.2:
+  registry.npmmirror.com/follow-redirects/1.14.9:
     resolution: {integrity: sha512-MQDfihBQYMcyy5dhRDJUHcw7lb2Pv/TuE6xP1vyraLukNDHKbDxDNaOE3NbCAdKQApno+GPRyo1YAp89yCjK4w==, registry: https://registry-node.aliyun.com/org/1780274396840544/registry/develop/, tarball: https://registry.npmmirror.com/follow-redirects/-/follow-redirects-1.14.9.tgz}
-    id: registry.npmmirror.com/follow-redirects/1.14.9
     name: follow-redirects
     version: 1.14.9
     engines: {node: '>=4.0'}
@@ -2902,8 +2901,6 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
-    dependencies:
-      debug: registry.npmmirror.com/debug/4.3.2
     dev: true
 
   registry.npmmirror.com/forever-agent/0.6.1:

@@ -1,12 +1,24 @@
 {
   "globals": {
+    "NAvatar": true,
+    "NBadge": true,
+    "NBreadcrumb": true,
+    "NBreadcrumbItem": true,
     "NButton": true,
-    "NCard": true,
-    "NCheckbox": true,
     "NConfigProvider": true,
+    "NDropdown": true,
     "NForm": true,
     "NFormItem": true,
     "NInput": true,
-    "NMessageProvider": true
+    "NLayout": true,
+    "NLayoutContent": true,
+    "NLayoutHeader": true,
+    "NLayoutSider": true,
+    "NMenu": true,
+    "NMessageProvider": true,
+    "NModal": true,
+    "NPopover": true,
+    "NTabPane": true,
+    "NTabs": true
   }
 }
