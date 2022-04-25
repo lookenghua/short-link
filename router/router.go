@@ -1,6 +1,8 @@
 package router
 
 import (
+	"github.com/goccy/go-json"
+	"short-link/router/guard"
 	. "short-link/router/middleware"
 )
 import (
@@ -16,7 +18,11 @@ import (
 
 // InitRouter 初始化路由
 func InitRouter() *fiber.App {
-	app := fiber.New()
+	// 自定义json转换器,提高效率
+	app := fiber.New(fiber.Config{
+		JSONEncoder: json.Marshal,
+		JSONDecoder: json.Unmarshal,
+	})
 
 	// 全局中间件
 	{
@@ -59,6 +65,8 @@ func InitRouter() *fiber.App {
 		apiV1.Post("/user", v1.CreateUser)
 		// 用户登录
 		apiV1.Post("/user/token", v1.LoginUser)
+		// 获取用户登录信息
+		apiV1.Get("/user", guard.UserGuard, v1.GetCurrentUserInfo)
 	}
 
 	return app

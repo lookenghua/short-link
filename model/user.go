@@ -20,3 +20,8 @@ func FindByUsername(username string) (*ent.User, error) {
 func UpdateToken(id int, t string) (*ent.User, error) {
 	return client.User.UpdateOneID(id).SetToken(t).Save(context.Background())
 }
+
+// FindByToken 根据token查询用户
+func FindByToken(token string) (*ent.User, error) {
+	return client.User.Query().Where(user.TokenEQ(token)).First(context.Background())
+}

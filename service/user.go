@@ -66,3 +66,12 @@ func SaveToken(id int, token string) error {
 	}
 	return nil
 }
+
+// FindByToken 根据token查询用户
+func FindByToken(token string) (*ent.User, error) {
+	u, err := model.FindByToken(token)
+	if err != nil && !ent.IsNotFound(err) {
+		return nil, err
+	}
+	return u, nil
+}

@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gofiber/fiber/v2"
 	. "short-link/common/dto"
+	"short-link/common/vo"
 	"short-link/service"
 	. "short-link/util"
 )
@@ -38,7 +39,6 @@ func LoginUser(c *fiber.Ctx) error {
 	if user == nil {
 		return apiUtil.Fail(DataFoundError, "用户名不存在")
 	}
-	// TODO:MD5加密
 	if *user.Password != data.Password {
 		return apiUtil.Fail(PasswordNotMatchedError, "密码错误")
 	}
@@ -48,10 +48,19 @@ func LoginUser(c *fiber.Ctx) error {
 		return apiUtil.Fail(CreateTokenError, findErr.Error())
 	}
 	// 存入token
-	_, saveErr := service.SaveToken(user.ID, token)
+	saveErr := service.SaveToken(user.ID, token)
 	if saveErr != nil {
 		return apiUtil.Fail(SaveDataError, findErr.Error())
 	}
 
 	return apiUtil.Success(token)
+}
+
+// GetCurrentUserInfo 获取当前用户信息
+func GetCurrentUserInfo(c *fiber.Ctx) error {
+	apiUtil := ApiUtil{Ctx: c}
+	var user = apiUtil.GetUserInfo()
+	userInfo := vo.UserInfo{}
+	apiUtil.Transform(&user, &userInfo)
+	return apiUtil.Success(userInfo)
 }
