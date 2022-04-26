@@ -6,7 +6,8 @@ import Components from "unplugin-vue-components/vite";
 import { NaiveUiResolver } from "unplugin-vue-components/resolvers";
 import AutoImport from "unplugin-auto-import/vite";
 import Unocss from "unocss/vite";
-
+import { visualizer } from "rollup-plugin-visualizer";
+import viteCompression from "vite-plugin-compression";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -32,6 +33,8 @@ export default defineConfig({
         globalsPropValue: true, // Default `true`, (true | false | 'readonly' | 'readable' | 'writable' | 'writeable')
       },
     }),
+    viteCompression(), // 压缩
+    visualizer(), // 分析打包
   ],
   resolve: {
     alias: {

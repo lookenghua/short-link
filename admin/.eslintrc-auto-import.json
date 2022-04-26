@@ -5,6 +5,8 @@
     "NBreadcrumb": true,
     "NBreadcrumbItem": true,
     "NButton": true,
+    "NCard": true,
+    "NCheckbox": true,
     "NConfigProvider": true,
     "NDropdown": true,
     "NForm": true,
